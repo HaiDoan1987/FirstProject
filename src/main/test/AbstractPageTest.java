@@ -7,9 +7,9 @@ import Utilities.Log;
 import Utilities.POconfig;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
-import org.apache.http.util.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -24,7 +24,6 @@ import org.testng.annotations.BeforeTest;
 import com.aventstack.extentreports.Status;
 import org.testng.internal.thread.ThreadTimeoutException;
 import test.pararell.LocalDriverManager;
-import org.apache.commons.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -66,12 +65,13 @@ public class AbstractPageTest  {
         return mapExtentTest.get(getCurrentThreadId());
     }
 
-    private  static StringBuffer getVerificationErrors()
+    public  static StringBuffer getVerificationErrors()
     {
         String testMethodName = mapThreadTest.get(getCurrentThreadId());
         return mapVerificationErrors.get(testMethodName);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T getPageObject(Class<T> pageInterfaceToProxy)
     {
         T page = null;
@@ -106,7 +106,7 @@ public class AbstractPageTest  {
         return page;
     }
 
-    public IHomePage getHomePage()
+    public IHomePage getHomePage() throws Exception
     {
         IHomePage homepage = getPageObject(IHomePage.class); return homepage;
     }
@@ -116,38 +116,12 @@ public class AbstractPageTest  {
         IAbstractPageObject abstractpageobject = getPageObject(IAbstractPageObject.class); return abstractpageobject;
     }
 
-    private static WebDriver getDriver()
+    public static WebDriver getDriver()
     {
         return LocalDriverManager.getDriver();
     }
 
 
-    public static void failVerificationPoint(AssertionError e)
-    {
-        try
-        {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-            String testStepName = Thread.currentThread().getStackTrace()[1].getMethodName();
-            String fullStackTrace = ExceptionUtils.getStackTrace(e);
-            getTestReport().log(Status.FAIL, "<pre>" + fullStackTrace + "</pre>");
-            String currentBrowser = getBrowser();
-            if (!"7".equals(currentBrowser))
-            {
-                String fileScreenshotName = projectDir + "\\logs\\failedScreenshots\\" + timeStamp + testStepName + ".jpeg";
-                File scrFile = ((TakesScreenshot)getDriver()).getScreenshotAs(OutputType.FILE);
-                FileUtils.copyFile(scrFile, new File(fileScreenshotName));
-                getTestReport().log(Status.INFO, "Snapshot for the failed point below: " + getTestReport().addScreenCaptureFromPath(fileScreenshotName));
-            }
-            else
-            {
-                getTestReport().log(Status.INFO, "NOTE! The snapshot for the failed point is not available for HTMLUnitDriver");
-            }
-        }
-        catch (IOException ioe)
-        {
-            getLogObj().warn(ioe.toString());
-        }
-    }
 
 
     public void setBrowser(String browser)
@@ -192,7 +166,7 @@ public class AbstractPageTest  {
             getTestReport().log(Status.INFO, className + "=== INITIALIZATION === Step - init");
             setBrowser(browser);
             //get all page object
-            getHomePage();
+            getHomePage();getAbstractPageObject();
             logger.startTestCase(test.getName());
         } catch (UnreachableBrowserException ube) {
             getLogObj().warn(ube.toString());
