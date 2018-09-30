@@ -1,4 +1,4 @@
-package PageObjects;
+package com.Axon.Tiki.PageObjects;
 
 import Interface.IHomePage;
 import org.openqa.selenium.WebDriver;

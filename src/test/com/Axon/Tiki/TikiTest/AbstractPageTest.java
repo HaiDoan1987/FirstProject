@@ -1,4 +1,4 @@
-package test;
+package com.Axon.Tiki;
 
 import Interface.IAbstractPageObject;
 import Interface.IHomePage;
@@ -7,9 +7,6 @@ import Utilities.Log;
 import Utilities.POconfig;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.Logger;
-import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -23,20 +20,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import com.aventstack.extentreports.Status;
 import org.testng.internal.thread.ThreadTimeoutException;
-import test.pararell.LocalDriverManager;
+import pararell.LocalDriverManager;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import static Utilities.Log.getLogObj;
 
-public class AbstractPageTest  {
+public class AbstractPageTest {
 
     private static POconfig config;
     private static String browser;

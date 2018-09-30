@@ -1,4 +1,4 @@
-package test;
+package com.Axon.Tiki;
 
 import org.testng.annotations.Test;
 

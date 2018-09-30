@@ -1,7 +1,8 @@
-package PageObjects;
+package com.Axon.Tiki.PageObjects;
 
 import Interface.IAbstractPageObject;
 import Utilities.Log;
+import com.Axon.Tiki.AbstractPageTest;
 import com.aventstack.extentreports.Status;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -9,7 +10,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import test.AbstractPageTest;
 
 import java.io.File;
 import java.io.IOException;

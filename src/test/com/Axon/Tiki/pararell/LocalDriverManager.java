@@ -1,4 +1,4 @@
-package test.pararell;
+package pararell;
 
 import org.openqa.selenium.WebDriver;
 
