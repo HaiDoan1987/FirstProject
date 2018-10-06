@@ -2,7 +2,7 @@ package com.Axon.Tiki.PageObjects;
 
 import Interface.IAbstractPageObject;
 import Utilities.Log;
-import com.Axon.Tiki.AbstractPageTest;
+import com.Axon.Tiki.TikiTest.AbstractPageTest;
 import com.aventstack.extentreports.Status;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -17,7 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-import static Utilities.POconfig.getTimeOut;
+import static com.Axon.Tiki.TikiTest.AbstractPageTest.getTimeOut;
+
 
 public class AbstractPageObject implements IAbstractPageObject {
 

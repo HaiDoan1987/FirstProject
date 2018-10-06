@@ -2,23 +2,24 @@
  * ExtentManager.java
  *
  * Copyright by CRIF AG
- * Zürich
+ * Zï¿½rich
  * All rights reserved.
  */
-package ch.ofwi.td.web.utils;
-
+package com.Axon.Tiki.Utilities;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.aventstack.extentreports.ExtentReporter;
+import com.aventstack.extentreports.ExtentReports;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Reporter;
+import static com.Axon.Tiki.TikiTest.AbstractPageTest.*;
+import static com.Axon.Tiki.TikiTest.AbstractPageTest.getBrowser;
+import static com.Axon.Tiki.TikiTest.AbstractPageTest.getBrowser;
 
-import com.relevantcodes.extentreports.ExtentReports;
-
-import ch.ofwi.td.web.test.AbstractBaseTest;
-
+import com.aventstack.extentreports.reporter.*;
 /**
  *
  *
@@ -44,7 +45,7 @@ public class ExtentManager
             String ipRunning = ip;
             @SuppressWarnings("rawtypes")
             Map sysInfo = new HashMap();
-            String browser = AbstractBaseTest.getBrowser();
+            String browser = getBrowser();
             String browserName;
             if ("0".equals(browser))
             {
@@ -63,25 +64,28 @@ public class ExtentManager
                 browserName = "Remote Web Driver";
                 if (StringUtils.containsIgnoreCase(browser, "-I-"))
                 {
-                    ipRunning = AbstractBaseTest.getProperty("instanceIpAddress");
+                    ipRunning = getProperty("instanceIpAddress");
                 }
             }
             sysInfo.put("Browser", browserName);
-            sysInfo.put("Environment", AbstractBaseTest.getEnvironment().toUpperCase());
+            sysInfo.put("Environment", getEnvironment().toUpperCase());
             fileName = "ExtentTestReport_" + ipRunning + ".html";
-            extent = new ExtentReports("logs/" + fileName, true);
+            extent = new ExtentReports();
+            ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter("logs/" + fileName);
+            extent.attachReporter(htmlReporter);
             // optional
-            extent.config()
+
+           /* extent.config()
                 .documentTitle("TD-WEB Automation Report")
                 .reportName("Automation Report")
-                .reportHeadline("- TR Regression Test");
+                .reportHeadline("- TR Regression Test");*/
 
             for (String s : Reporter.getOutput())
             {
                 extent.setTestRunnerOutput(s);
             }
 
-            extent.addSystemInfo(sysInfo);
+            //extent.addSystemInfo(sysInfo);
         }
         return extent;
     }

@@ -1,4 +1,4 @@
-package Utilities;
+package com.Axon.Tiki.Utilities;
 
 public class Constants {
 
@@ -10,5 +10,7 @@ public class Constants {
         }
 
         public static final String BREAK_TO_NEW_LINE = "\n";
+
+        public static final String COMMA = ",";
     }
 }

@@ -1,4 +1,4 @@
-package Utilities;
+package com.Axon.Tiki.Utilities;
 
 import org.openqa.selenium.WebDriver;
 
@@ -11,7 +11,7 @@ public class POconfig  {
 
     public POconfig() throws IOException
     {
-        InputStream in = getClass().getResourceAsStream("/td-web-testing/testconfig.properties");
+        InputStream in = getClass().getResourceAsStream("/Tiki-Test-Config/testconfig.properties");
         try
         {
             prop.load(in);

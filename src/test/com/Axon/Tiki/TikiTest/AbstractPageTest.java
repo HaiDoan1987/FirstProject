@@ -1,13 +1,17 @@
-package com.Axon.Tiki;
+package com.Axon.Tiki.TikiTest;
 
 import Interface.IAbstractPageObject;
 import Interface.IHomePage;
-import Utilities.Constants;
+import com.Axon.Tiki.Utilities.Constants;
 import Utilities.Log;
-import Utilities.POconfig;
+import com.Axon.Tiki.Utilities.ExtentManager;
+import com.Axon.Tiki.Utilities.POconfig;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -15,6 +19,7 @@ import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import org.testng.ITestResult;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -26,6 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +56,17 @@ public class AbstractPageTest {
     {
         String strBrowser = config.getProperty("browser");
         return strBrowser;
+    }
+
+    public static Log getLogObj()
+    {
+        return logger;
+    }
+
+    public static int getTimeOut()
+    {
+        String strTimeout = config.getProperty("globalTimeOut");
+        return Integer.parseInt(strTimeout);
     }
 
     public static long getCurrentThreadId()
@@ -101,6 +120,32 @@ public class AbstractPageTest {
         return page;
     }
 
+    public void setEnvironment(String strEnvironment)
+    {
+        getLogObj().info(className + " - Step - setEnvironment " + strEnvironment);
+        getTestReport().log(Status.INFO, className + " - Step - setEnvironment " + strEnvironment);
+        if (strEnvironment.equals("intvn"))
+        {
+            getDriver().get("https://ofwi-int-vn-dn.teledata.local:8078/td-web/login");
+        }
+        else
+        {
+            getDriver().get("https://" + strEnvironment.toLowerCase() +  ".teledata.ch");
+        }
+        String resolution = getProperty("resolution");
+        if (resolution.equals("0"))
+        {
+            getDriver().manage().window().maximize();
+        }
+        else if (!resolution.equals("1") & !resolution.equals("0"))
+        {
+            String[] strparts = resolution.toLowerCase().split(Constants.CHARACTER.COMMA);
+            int windowWidth = Integer.parseInt(strparts[0]); int windowHeight = Integer.parseInt(strparts[1]);
+            Dimension dimension = new Dimension(windowWidth, windowHeight);
+            getDriver().manage().window().setSize(dimension);
+        }
+    }
+
     public IHomePage getHomePage() throws Exception
     {
         IHomePage homepage = getPageObject(IHomePage.class); return homepage;
@@ -116,8 +161,45 @@ public class AbstractPageTest {
         return LocalDriverManager.getDriver();
     }
 
+    public static String getProperty(String properties)
+    {
+        try
+        {
+            config = new POconfig();
+        }
+        catch (IOException e)
+        {
+            getLogObj().warn("Error occurred: " + e.getMessage().toString());
+        }
+        return config.getProperty(properties);
+    }
 
-
+    public static void failVerificationPoint(AssertionError e)
+    {
+        try
+        {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+            String testStepName = Thread.currentThread().getStackTrace()[1].getMethodName();
+            String fullStackTrace = ExceptionUtils.getStackTrace(e);
+            getTestReport().log(Status.FAIL, "<pre>" + fullStackTrace + "</pre>");
+            String currentBrowser = getBrowser();
+            if (!"7".equals(currentBrowser))
+            {
+                String fileScreenshotName = projectDir + "\\logs\\failedScreenshots\\" + timeStamp + testStepName + ".jpeg";
+                File scrFile = ((TakesScreenshot)getDriver()).getScreenshotAs(OutputType.FILE);
+                FileUtils.copyFile(scrFile, new File(fileScreenshotName), true);
+                getTestReport().log(Status.INFO, "Snapshot for the failed point below: " + getTestReport().addScreenCaptureFromPath(fileScreenshotName));
+            }
+            else
+            {
+                getTestReport().log(Status.INFO, "NOTE! The snapshot for the failed point is not available for HTMLUnitDriver");
+            }
+        }
+        catch (IOException ioe)
+        {
+            getLogObj().warn(ioe.toString());
+        }
+    }
 
     public void setBrowser(String browser)
     {
@@ -126,16 +208,17 @@ public class AbstractPageTest {
         {
             getLogObj().info(className + " - Step - setBrowser Firefox");
             getTestReport().log(Status.INFO, className + " - Step - setBrowser Firefox");
-            FirefoxProfile firefoxProfile = new FirefoxProfile(new File(projectDir + "/conf/firefox-profile"));
+            FirefoxProfile firefoxProfile = new FirefoxProfile(new File(projectDir + "/src/Conf/firefox-profile"));
             firefoxProfile.setPreference("browser.download.folderList", 2);
             //firefoxProfile.setPreference("browser.download.dir", System.getProperty("user.dir") + "\\logs\\downloadedCSV");
             //firefoxProfile.setPreference("browser.helperApps.neverAsk.saveToDisk", "text/csv");
-            System.setProperty("webdriver.gecko.driver", projectDir + "/conf/GeckoDriverServer/geckodriver.exe"); System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
+            System.setProperty("webdriver.gecko.driver", projectDir + "/src/Conf/GeckoDriverServer/geckodriver.exe"); System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
             System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
             FirefoxOptions option = new FirefoxOptions(); option.setProfile(firefoxProfile);
             driver = new FirefoxDriver(option);
             getTestReport().log(Status.INFO, className + "=== Step - setBrowser FIREFOX - LOCAL");
         }
+        LocalDriverManager.setWebDriver(driver);
     }
 
     @BeforeTest(alwaysRun = true)
@@ -153,6 +236,7 @@ public class AbstractPageTest {
             verificationErrors.setLength(0);
             mapVerificationErrors.put(test.getName(), verificationErrors);
             mapThreadTest.put(Thread.currentThread().getId(), test.getName());
+            extentReport = ExtentManager.getInstance(InetAddress.getLocalHost().getHostAddress());
             config = new POconfig();
             ExtentTest extentTest = extentReport.createTest(test.getName());
             extentTest.assignCategory(test.getDeclaringClass().getName());
@@ -249,6 +333,25 @@ public class AbstractPageTest {
 
     }
 
+    @AfterClass(alwaysRun = true)
+    public void showHTMLReport()
+    {
+        Runtime rt = Runtime.getRuntime();
+        try
+        {
+            String command = "start firefox D:\\projects\\td-web-testing\\logs\\" + ExtentManager.getFileName();
+            rt.exec(new String[]{"cmd.exe", "/c", command});
+        }
+        catch (IOException e)
+        {
+            getLogObj().warn(e.toString());
+        }
+    }
+
+    public static String getEnvironment()
+    {
+        return config.getProperty("environment");
+    }
 
     private class ProcessStillAliveException extends RuntimeException
     {
